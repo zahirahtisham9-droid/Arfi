@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Aarifi Business Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a6b2a;
+  --primary-dark: #0d4019;
+  --primary-light: #2e9e45;
+  --accent: #f5a623;
+  --bg: #eef3ee;
+  --card: #ffffff;
+  --text: #1a2e1a;
+  --text-light: #5a7a5a;
+  --border: #c8dcc8;
+  --red: #c0392b;
+  --blue: #2980b9;
+  --shadow: 0 2px 16px rgba(26,107,42,0.10);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Nastaliq Urdu', 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  overflow-x: hidden;
+
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: white; padding: 0 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 3px 16px rgba(0,0,0,0.3);
+}
+.topbar-center { text-align: center; flex: 1; }
+.topbar-title { font-size: 16px; font-weight: 700; }
+.topbar-sub { font-size: 10px; opacity: 0.75; margin-top: 1px; }
+.menu-btn, .logout-btn {
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  width: 38px; height: 38px; border-radius: 10px; cursor: pointer;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== SIDEBAR ===== */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; }
+.overlay.show { display: block; }
+.sidebar {
+  position: fixed; top: 0; right: -290px; width: 290px; height: 100%;
+  background: white; z-index: 201; transition: right 0.28s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; box-shadow: -6px 0 30px rgba(0,0,0,0.18);
+}
+.sidebar.open { right: 0; }
+.sidebar-head {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+  color: white; padding: 32px 20px 22px;
+}
+.sidebar-head .logo { font-size: 36px; }
+.sidebar-head h2 { font-size: 18px; font-weight: 700; margin-top: 6px; }
+.sidebar-head p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+.nav-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 20px; cursor: pointer;
+  border-bottom: 1px solid #f5f5f5; font-size: 15px; color: var(--text);
+  transition: background 0.15s; user-select: none;
+}
+.nav-item:hover { background: #e8f5e9; }
+.nav-item.active { background: #e8f5e9; color: var(--primary); font-weight: 700; }
+.nav-icon { font-size: 22px; width: 30px; text-align: center; }
+.nav-logout { color: var(--red) !important; margin-top: auto; border-top: 2px solid #fdecea; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: white; display: flex;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.12); z-index: 99;
+  border-top: 1px solid #e8e8e8;
+}
+.bnav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 9px 4px 12px; cursor: pointer; font-size: 10px; color: var(--text-light);
+  transition: color 0.15s; user-select: none;
+}
+.bnav-item .bi { font-size: 22px; margin-bottom: 3px; }
+.bnav-item.active { color: var(--primary); }
+.bnav-item.active .bi { transform: scale(1.1); }
+
+/* ===== PAGES ===== */
+.page { display: none; padding: 14px 14px 90px; max-width: 620px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ===== LOGIN ===== */
+#loginPage {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 24px;
+  background: linear-gradient(160deg, #0d4019 0%, #1a6b2a 55%, #2e9e45 100%);
+}
+.login-card {
+  background: white; border-radius: 28px; padding: 38px 26px;
+  width: 100%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+}
+.login-logo { text-align: center; margin-bottom: 28px; }
+.login-logo .emoji { font-size: 58px; display: block; }
+.login-logo h1 { font-size: 20px; color: var(--primary); font-weight: 700; margin-top: 8px; }
+.login-logo p { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 15px; }
+label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 6px; font-weight: 600; }
+input, select, textarea {
+  width: 100%; padding: 13px 14px; border: 2px solid var(--border);
+  border-radius: 12px; font-size: 14px; font-family: inherit; color: var(--text);
+  background: #fafafa; transition: border 0.2s; outline: none; direction: rtl;
+}
+input[dir="ltr"], select[dir="ltr"] { direction: ltr; text-align: left; }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary); background: white;
+  box-shadow: 0 0 0 3px rgba(26,107,42,0.1);
+}
+textarea { resize: vertical; min-height: 75px; }
+select { appearance: none; cursor: pointer; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 13px 20px; border: none; border-radius: 12px; font-size: 14px;
+  cursor: pointer; font-family: inherit; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; transition: all 0.18s; user-select: none;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-danger { background: var(--red); color: white; }
+.btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+.btn-green { background: #25D366; color: white; }
+.btn-full { width: 100%; }
+.btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 9px; }
+.btn-xs { padding: 6px 11px; font-size: 11px; border-radius: 8px; }
+
+/* ===== CARDS ===== */
+.card {
+  background: white; border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); margin-bottom: 12px;
+  border: 1px solid rgba(200,220,200,0.5);
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.card-sub { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+.card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 11px; justify-content: flex-end; }
+
+/* ===== DASHBOARD ===== */
+.page-title { font-size: 14px; color: var(--text-light); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 20px; }
+.dash-card {
+  border-radius: 18px; padding: 18px 14px; color: white;
+  text-align: center; cursor: pointer;
+  transition: transform 0.2s; position: relative; overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+.dash-card:active { transform: scale(0.97); }
+.dash-card::after {
+  content: ''; position: absolute; bottom: -20px; left: -20px;
+  width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.dc-1 { background: linear-gradient(135deg, #1a6b2a, #34a853); }
+.dc-2 { background: linear-gradient(135deg, #bf360c, #e64a19); }
+.dc-3 { background: linear-gradient(135deg, #0d47a1, #1976d2); }
+.dc-4 { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+.dash-icon { font-size: 30px; margin-bottom: 6px; }
+.dash-num { font-size: 28px; font-weight: 900; line-height: 1; font-family: 'Cairo', sans-serif; }
+.dash-label { font-size: 11px; opacity: 0.9; margin-top: 5px; font-weight: 600; }
+
+.sec-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 18px 0 12px;
+  padding-right: 12px; border-right: 4px solid var(--accent);
+}
+.sec-head h3 { font-size: 15px; font-weight: 700; color: var(--primary); }
+
+/* ===== SEARCH ===== */
+.search-wrap { position: relative; margin-bottom: 13px; }
+.search-wrap input { padding-right: 44px; }
+.search-ico { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 17px; color: var(--text-light); pointer-events: none; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+}
+.b-pending   { background: #fff3cd; color: #856404; }
+.b-dispatched{ background: #cce5ff; color: #004085; }
+.b-delivered { background: #d4edda; color: #155724; }
+.b-returned  { background: #f8d7da; color: #721c24; }
+
+/* ===== PROFIT TAG ===== */
+.p-tag { background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.l-tag { background: #f8d7da; color: #721c24; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+
+/* ===== FILTER PILLS ===== */
+.filter-row { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 13px; scrollbar-width: none; }
+.filter-row::-webkit-scrollbar { display: none; }
+.f-pill {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  border: 2px solid var(--border); background: white; color: var(--text-light);
+  cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.15s;
+}
+.f-pill.on { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ===== MODAL ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 300; align-items: flex-end; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: white; border-radius: 26px 26px 0 0;
+  padding: 22px 18px 36px; width: 100%; max-width: 620px;
+  max-height: 92vh; overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+.modal-x { background: #f0f0f0; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 16px; }
+
+/* ===== PRICE PREVIEW ===== */
+.price-box { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 2px solid #a5d6a7; border-radius: 14px; padding: 14px; margin: 10px 0 14px; }
+.price-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 7px; }
+.price-row:last-child { margin-bottom: 0; font-weight: 700; font-size: 16px; border-top: 1px dashed #a5d6a7; padding-top: 9px; margin-top: 4px; }
+
+/* ===== CONFIRM ===== */
+.conf-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 400; align-items: center; justify-content: center; padding: 20px; }
+.conf-bg.open { display: flex; }
+.conf-box { background: white; border-radius: 22px; padding: 30px 22px; max-width: 310px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+.conf-icon { font-size: 46px; margin-bottom: 12px; }
+.conf-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.conf-msg { font-size: 13px; color: var(--text-light); margin-bottom: 22px; line-height: 1.7; }
+.conf-btns { display: flex; gap: 10px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1a2e1a; color: white; padding: 13px 26px; border-radius: 30px;
+  font-size: 14px; z-index: 999; opacity: 0; transition: all 0.3s; white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3); pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok  { background: var(--primary); }
+.toast.err { background: var(--red); }
+
+/* ===== EMPTY ===== */
+.empty { text-align: center; padding: 44px 20px; color: var(--text-light); }
+.empty-ico { font-size: 52px; margin-bottom: 12px; opacity: 0.35; }
+.empty p { font-size: 14px; }
+
+/* ===== LOADER ===== */
+.loader { text-align: center; padding: 32px; }
+.spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: sp 0.75s linear infinite; margin: 0 auto 12px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.loader p { font-size: 13px; color: var(--text-light); }
+
+/* ===== REPORT ===== */
+.rep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.rep-card { background: white; border-radius: 14px; padding: 16px 12px; text-align: center; border: 2px solid var(--border); }
+.rep-num { font-size: 22px; font-weight: 900; color: var(--primary); font-family: 'Cairo', sans-serif; }
+.rep-lbl { font-size: 11px; color: var(--text-light); margin-top: 4px; font-weight: 600; }
+
+/* ===== HISTORY STATS ===== */
+.hist-row { display: flex; gap: 9px; margin-bottom: 16px; }
+.hist-stat { flex: 1; background: white; border-radius: 12px; padding: 13px 8px; text-align: center; border: 2px solid var(--border); }
+.hist-num { font-size: 18px; font-weight: 900; color: var(--primary); font-family: 'Cairo', sans-serif; }
+.hist-lbl { font-size: 10px; color: var(--text-light); margin-top: 3px; }
+
+/* ===== CHIP ===== */
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
+.chip { background: #f0f4f0; border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--text-light); }
+
+/* STATUS dropdown color */
+select#oStatus option[value="Pending"]    { color: #856404; }
+select#oStatus option[value="Dispatched"] { color: #004085; }
+select#oStatus option[value="Delivered"]  { color: #155724; }
+select#oStatus option[value="Returned"]   { color: #721c24; }
+
+.wa-msg-box {
+  background: #e7fde7; border: 2px solid #a5d6a7; border-radius: 16px;
+  padding: 16px; font-size: 14px; line-height: 2.1;
+  white-space: pre-wrap; word-break: break-word; direction: rtl;
+  max-height: 340px; overflow-y: auto; margin-bottom: 16px;
+  font-family: 'Noto Nastaliq Urdu', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CONFIRM -->
+<div class="conf-bg" id="confBg">
+  <div class="conf-box">
+    <div class="conf-icon">🗑️</div>
+    <div class="conf-title">تصدیق کریں</div>
+    <div class="conf-msg" id="confMsg">کیا آپ واقعی delete کرنا چاہتے ہیں؟</div>
+    <div class="conf-btns">
+      <button class="btn btn-danger btn-full" id="confYes">ہاں، Delete</button>
+      <button class="btn btn-outline btn-full" onclick="closeConf()">نہیں</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="emoji">🌿</span>
+      <h1>Aarifi Business Manager</h1>
+      <p>عارفی دارالشفاء — ادویات مینیجمنٹ سسٹم</p>
+    </div>
+
+    <!-- TABS -->
+    <div style="display:flex;background:#f0f4f0;border-radius:14px;padding:4px;margin-bottom:22px;">
+      <button id="tabLogin" onclick="switchTab('login')"
+        style="flex:1;padding:10px;border:none;border-radius:11px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:var(--primary);color:white;transition:all 0.2s;">
+        🔐 Login
+      </button>
+      <button id="tabReg" onclick="switchTab('register')"
+        style="flex:1;padding:10px;border:none;border-radius:11px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-light);transition:all 0.2s;">
+        📝 Register
+      </button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label>📧 ای میل</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label>🔒 پاسورڈ</label>
+        <input type="password" id="loginPw" placeholder="••••••••" dir="ltr">
+      </div>
+      <button class="btn btn-primary btn-full" id="loginBtn" style="margin-top:6px;" onclick="doLogin()">
+        🔐 Login کریں
+      </button>
+      <p style="text-align:center;font-size:13px;color:var(--text-light);margin-top:16px;">
+        نیا account نہیں ہے؟
+        <span onclick="switchTab('register')" style="color:var(--primary);font-weight:700;cursor:pointer;">Register کریں</span>
+      </p>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label>👤 آپ کا نام</label>
+        <input type="text" id="regName" placeholder="مکمل نام">
+      </div>
+      <div class="form-group">
+        <label>📧 ای میل</label>
+        <input type="email" id="regEmail" placeholder="your@email.com" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label>🔒 پاسورڈ (کم از کم 6 حروف)</label>
+        <input type="password" id="regPw" placeholder="••••••••" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label>🔒 پاسورڈ دوبارہ لکھیں</label>
+        <input type="password" id="regPw2" placeholder="••••••••" dir="ltr">
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:6px;" onclick="doRegister()">
+        📝 Account بنائیں
+      </button>
+      <p style="text-align:center;font-size:13px;color:var(--text-light);margin-top:16px;">
+        پہلے سے account ہے؟
+        <span onclick="switchTab('login')" style="color:var(--primary);font-weight:700;cursor:pointer;">Login کریں</span>
+      </p>
+    </div>
+
+    <p style="text-align:center;font-size:11px;color:#bbb;margin-top:16px;">Powered by Firebase | عارفی دارالشفاء</p>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="mainApp" style="display:none;">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="openSidebar()">☰</button>
+    <div class="topbar-center">
+      <div class="topbar-title" id="topTitle">🏠 Dashboard</div>
+      <div class="topbar-sub">عارفی دارالشفاء</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()" title="Logout">🚪</button>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="logo">🌿</div>
+      <h2>Aarifi Manager</h2>
+      <p>عارفی دارالشفاء مینیجمنٹ</p>
+    </div>
+    <div class="nav-item active" id="sn-dashboard" onclick="gotoPage('dashboard')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-item" id="sn-products" onclick="gotoPage('products')">
+      <span class="nav-icon">💊</span> Products — پروڈکٹس
+    </div>
+    <div class="nav-item" id="sn-customers" onclick="gotoPage('customers')">
+      <span class="nav-icon">👥</span> Customers — گاہک
+    </div>
+    <div class="nav-item" id="sn-orders" onclick="gotoPage('orders')">
+      <span class="nav-icon">📦</span> Orders — آرڈرز
+    </div>
+    <div class="nav-item" id="sn-reports" onclick="gotoPage('reports')">
+      <span class="nav-icon">📊</span> Reports — رپورٹ
+    </div>
+    <div class="nav-item nav-logout" onclick="doLogout()">
+      <span class="nav-icon">🚪</span> Logout — خروج
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="page active" id="pg-dashboard">
+    <div class="page-title">👋 خوش آمدید! آج کی خلاصہ رپورٹ</div>
+    <div class="dash-grid">
+      <div class="dash-card dc-1" onclick="gotoPage('orders')">
+        <div class="dash-icon">📦</div>
+        <div class="dash-num" id="d-todayOrders">0</div>
+        <div class="dash-label">آج کے آرڈر</div>
+      </div>
+      <div class="dash-card dc-2" onclick="gotoPage('orders')">
+        <div class="dash-icon">💰</div>
+        <div class="dash-num" id="d-todaySales" style="font-size:19px;">Rs.0</div>
+        <div class="dash-label">آج کی سیل</div>
+      </div>
+      <div class="dash-card dc-3" onclick="gotoPage('customers')">
+        <div class="dash-icon">👥</div>
+        <div class="dash-num" id="d-customers">0</div>
+        <div class="dash-label">کل گاہک</div>
+      </div>
+      <div class="dash-card dc-4" onclick="gotoPage('products')">
+        <div class="dash-icon">💊</div>
+        <div class="dash-num" id="d-products">0</div>
+        <div class="dash-label">کل پروڈکٹس</div>
+      </div>
+    </div>
+    <div class="sec-head">
+      <h3>📦 حالیہ آرڈرز</h3>
+      <button class="btn btn-outline btn-sm" onclick="gotoPage('orders')">سب دیکھیں</button>
+    </div>
+    <div id="recentOrders"><div class="loader"><div class="spin"></div><p>لوڈ ہو رہا ہے...</p></div></div>
+  </div>
+
+  <!-- ===== PRODUCTS ===== -->
+  <div class="page" id="pg-products">
+    <div class="sec-head" style="margin-top:4px;">
+      <h3>💊 پروڈکٹس</h3>
+      <button class="btn btn-primary btn-sm" onclick="openProdModal()">➕ نیا</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="srchProd" placeholder="پروڈکٹ تلاش کریں..." oninput="renderProds()">
+      <span class="search-ico">🔍</span>
+    </div>
+    <div id="prodList"><div class="loader"><div class="spin"></div><p>لوڈ ہو رہا ہے...</p></div></div>
+  </div>
+
+  <!-- ===== CUSTOMERS ===== -->
+  <div class="page" id="pg-customers">
+    <div class="sec-head" style="margin-top:4px;">
+      <h3>👥 گاہک</h3>
+      <button class="btn btn-primary btn-sm" onclick="openCustModal()">➕ نیا</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="srchCust" placeholder="نام یا موبائل سے تلاش..." oninput="renderCusts()">
+      <span class="search-ico">🔍</span>
+    </div>
+    <div id="custList"><div class="loader"><div class="spin"></div><p>لوڈ ہو رہا ہے...</p></div></div>
+  </div>
+
+  <!-- ===== ORDERS ===== -->
+  <div class="page" id="pg-orders">
+    <div class="sec-head" style="margin-top:4px;">
+      <h3>📦 آرڈرز</h3>
+      <button class="btn btn-primary btn-sm" onclick="openOrderModal()">➕ نیا</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="srchOrder" placeholder="گاہک یا پروڈکٹ تلاش..." oninput="renderOrders()">
+      <span class="search-ico">🔍</span>
+    </div>
+    <div class="filter-row">
+      <button class="f-pill on" id="fp-all"        onclick="setFilter('all')">سب</button>
+      <button class="f-pill"    id="fp-Pending"    onclick="setFilter('Pending')">⏳ Pending</button>
+      <button class="f-pill"    id="fp-Dispatched" onclick="setFilter('Dispatched')">🚚 Dispatched</button>
+      <button class="f-pill"    id="fp-Delivered"  onclick="setFilter('Delivered')">✅ Delivered</button>
+      <button class="f-pill"    id="fp-Returned"   onclick="setFilter('Returned')">↩️ Returned</button>
+    </div>
+    <div id="orderList"><div class="loader"><div class="spin"></div><p>لوڈ ہو رہا ہے...</p></div></div>
+  </div>
+
+  <!-- ===== REPORTS ===== -->
+  <div class="page" id="pg-reports">
+    <div class="sec-head" style="margin-top:4px;"><h3>📊 سیل رپورٹ</h3></div>
+    <div class="card">
+      <div class="form-group">
+        <label>📅 شروع تاریخ</label>
+        <input type="date" id="rFrom" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label>📅 آخری تاریخ</label>
+        <input type="date" id="rTo" dir="ltr">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="makeReport()">📊 رپورٹ بنائیں</button>
+    </div>
+    <div id="reportOut"></div>
+  </div>
+
+  <!-- ===== HISTORY ===== -->
+  <div class="page" id="pg-history">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <button onclick="gotoPage('customers')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--primary);">←</button>
+      <div>
+        <div style="font-size:17px;font-weight:700;" id="histName">گاہک کی تاریخ</div>
+        <div style="font-size:12px;color:var(--text-light);">تمام آرڈرز</div>
+      </div>
+    </div>
+    <div class="hist-row" id="histStats"></div>
+    <div id="histList"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="bnav-item active" id="bn-dashboard" onclick="gotoPage('dashboard')">
+      <span class="bi">🏠</span><span>Home</span>
+    </div>
+    <div class="bnav-item" id="bn-products" onclick="gotoPage('products')">
+      <span class="bi">💊</span><span>Products</span>
+    </div>
+    <div class="bnav-item" id="bn-customers" onclick="gotoPage('customers')">
+      <span class="bi">👥</span><span>Customers</span>
+    </div>
+    <div class="bnav-item" id="bn-orders" onclick="gotoPage('orders')">
+      <span class="bi">📦</span><span>Orders</span>
+    </div>
+    <div class="bnav-item" id="bn-reports" onclick="gotoPage('reports')">
+      <span class="bi">📊</span><span>Reports</span>
+    </div>
+  </div>
+</div><!-- /mainApp -->
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-bg" id="mProd">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="mProdTitle">نیا پروڈکٹ</span>
+      <button class="modal-x" onclick="closeM('mProd')">✕</button>
+    </div>
+    <input type="hidden" id="editProdId">
+    <div class="form-group">
+      <label>💊 پروڈکٹ کا نام *</label>
+      <input type="text" id="pName" placeholder="مثال: شہد خالص، جوشاندہ...">
+    </div>
+    <div class="form-group">
+      <label>🧪 فارمولا / اجزاء</label>
+      <textarea id="pFormula" placeholder="اجزاء یا فارمولا لکھیں..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>💰 فروخت قیمت (Rs.)*</label>
+        <input type="number" id="pSell" placeholder="0" dir="ltr" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label>📦 لاگت قیمت (Rs.)*</label>
+        <input type="number" id="pCost" placeholder="0" dir="ltr" oninput="calcProfit()">
+      </div>
+    </div>
+    <div id="profitShow" style="margin-bottom:13px;"></div>
+    <div class="form-group">
+      <label>📋 طریقہ استعمال</label>
+      <textarea id="pUsage" placeholder="استعمال کا طریقہ..."></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveProd()">💾 محفوظ کریں</button>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER MODAL ===== -->
+<div class="modal-bg" id="mCust">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="mCustTitle">نیا گاہک</span>
+      <button class="modal-x" onclick="closeM('mCust')">✕</button>
+    </div>
+    <input type="hidden" id="editCustId">
+    <div class="form-group">
+      <label>👤 گاہک کا نام *</label>
+      <input type="text" id="cName" placeholder="مکمل نام">
+    </div>
+    <div class="form-group">
+      <label>📱 موبائل نمبر * (منفرد ہونا ضروری)</label>
+      <input type="tel" id="cMobile" placeholder="03xxxxxxxxx" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label>📍 پتہ / شہر</label>
+      <textarea id="cAddr" placeholder="گھر کا پتہ، شہر..."></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveCust()">💾 محفوظ کریں</button>
+  </div>
+</div>
+
+<!-- ===== ORDER MODAL ===== -->
+<div class="modal-bg" id="mOrder">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="mOrderTitle">نیا آرڈر</span>
+      <button class="modal-x" onclick="closeM('mOrder')">✕</button>
+    </div>
+    <input type="hidden" id="editOrdId">
+    <div class="form-group">
+      <label>📱 گاہک موبائل نمبر *</label>
+      <input type="tel" id="oMob" placeholder="03xxxxxxxxx" dir="ltr" oninput="lookupCust()">
+      <div id="custFound" style="font-size:13px;margin-top:7px;font-weight:600;"></div>
+    </div>
+    <div class="form-group">
+      <label>💊 پروڈکٹ منتخب کریں *</label>
+      <select id="oProd" onchange="calcOrder()">
+        <option value="">-- پروڈکٹ چنیں --</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>🔢 تعداد *</label>
+        <input type="number" id="oQty" value="1" min="1" dir="ltr" oninput="calcOrder()">
+      </div>
+      <div class="form-group">
+        <label>🏷️ چھوٹ (Rs.)</label>
+        <input type="number" id="oDisc" value="0" min="0" dir="ltr" oninput="calcOrder()">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>🚚 ڈیلیوری چارجز (Rs.)</label>
+        <input type="number" id="oDelivery" value="0" min="0" dir="ltr" oninput="calcOrder()">
+      </div>
+      <div class="form-group">
+        <label>💳 ادائیگی کا طریقہ</label>
+        <select id="oPayType" onchange="calcOrder()">
+          <option value="Advance">💵 Advance</option>
+          <option value="COD">📦 COD (4% ٹیکس)</option>
+        </select>
+      </div>
+    </div>
+    <div id="orderCalc"></div>
+    <div class="form-group">
+      <label>🚚 کوریئر کمپنی</label>
+      <select id="oCourier">
+        <option value="">-- کوریئر چنیں --</option>
+        <option>TCS</option>
+        <option>LEOPARDS</option>
+        <option>TRAX</option>
+        <option>M&P</option>
+        <option>POST EX</option>
+        <option>PAK POST</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>📬 ٹریکنگ نمبر</label>
+      <input type="text" id="oTrack" placeholder="Tracking Number" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label>📌 آرڈر Status</label>
+      <select id="oStatus">
+        <option value="Pending">⏳ Pending</option>
+        <option value="Dispatched">🚚 Dispatched</option>
+        <option value="Delivered">✅ Delivered</option>
+        <option value="Returned">↩️ Returned</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveOrder()">💾 آرڈر محفوظ کریں</button>
+  </div>
+</div>
+
+<!-- ===== WHATSAPP MODAL ===== -->
+<div class="modal-bg" id="mWa">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">📱 WhatsApp Message</span>
+      <button class="modal-x" onclick="closeM('mWa')">✕</button>
+    </div>
+    <div class="wa-msg-box" id="waText"></div>
+    <button class="btn btn-green btn-full" id="waSendBtn">
+      📱 WhatsApp پر بھیجیں
+    </button>
+  </div>
+</div>
+
+<!-- ========== FIREBASE + LOGIC ========== -->
+<script type="module">
+import { initializeApp }               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                                        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+         onSnapshot, query, orderBy, where, serverTimestamp }
+                                        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ===== YOUR FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyAwyG2rt4wzabje5cFJ36BKaBXYZFhjHb0",
+  authDomain: "aarfi-afcc5.firebaseapp.com",
+  projectId: "aarfi-afcc5",
+  storageBucket: "aarfi-afcc5.firebasestorage.app",
+  messagingSenderId: "133094991188",
+  appId: "1:133094991188:web:a0da04954b64a7fa13d4c1",
+  measurementId: "G-9ERLJ3J70W"
+};
+
+const fbApp  = initializeApp(firebaseConfig);
+const auth   = getAuth(fbApp);
+const db     = getFirestore(fbApp);
+
+// ===== STATE =====
+let products  = [];
+let customers = [];
+let orders    = [];
+let orderFilter = 'all';
+let confCb    = null;
+
+// ===== AUTH =====
+let listenersStarted = false;
+
+function showMainApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display   = 'block';
+  // Wait for DOM to update before calling gotoPage
+  setTimeout(() => {
+    window.gotoPage('dashboard');
+  }, 50);
+  if (!listenersStarted) {
+    listenersStarted = true;
+    startListeners();
+  }
+}
+
+function showLoginPage() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('mainApp').style.display   = 'none';
+  listenersStarted = false;
+}
+
+onAuthStateChanged(auth, user => {
+  if (user) { showMainApp(); }
+  else       { showLoginPage(); }
+});
+
+window.switchTab = (tab) => {
+  const isLogin = tab === 'login';
+  document.getElementById('loginForm').style.display    = isLogin ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = isLogin ? 'none'  : 'block';
+  document.getElementById('tabLogin').style.background  = isLogin ? 'var(--primary)' : 'transparent';
+  document.getElementById('tabLogin').style.color       = isLogin ? 'white' : 'var(--text-light)';
+  document.getElementById('tabReg').style.background    = isLogin ? 'transparent' : 'var(--primary)';
+  document.getElementById('tabReg').style.color         = isLogin ? 'var(--text-light)' : 'white';
+};
+
+window.doLogin = async () => {
+  const em = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  if (!em || !pw) { toast('ای میل اور پاسورڈ درج کریں','err'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ لوڈ ہو رہا ہے...';
+  try {
+    await signInWithEmailAndPassword(auth, em, pw);
+    btn.textContent = '✅ Login کامیاب!';
+    showMainApp();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '🔐 Login کریں';
+    const msg = e.code === 'auth/user-not-found'    ? 'یہ email registered نہیں — پہلے Register کریں'
+              : e.code === 'auth/wrong-password'     ? 'پاسورڈ غلط ہے'
+              : e.code === 'auth/invalid-email'      ? 'Email درست نہیں'
+              : e.code === 'auth/invalid-credential' ? 'Email یا Password غلط ہے'
+              : 'Login ناکام — ' + e.message;
+    toast(msg,'err');
+  }
+};
+
+window.doRegister = async () => {
+  const name = document.getElementById('regName').value.trim();
+  const em   = document.getElementById('regEmail').value.trim();
+  const pw   = document.getElementById('regPw').value;
+  const pw2  = document.getElementById('regPw2').value;
+  if (!name) { toast('اپنا نام درج کریں','err'); return; }
+  if (!em)   { toast('ای میل درج کریں','err'); return; }
+  if (!pw)   { toast('پاسورڈ درج کریں','err'); return; }
+  if (pw.length < 6) { toast('پاسورڈ کم از کم 6 حروف کا ہونا چاہیے','err'); return; }
+  if (pw !== pw2) { toast('دونوں پاسورڈ ایک جیسے نہیں ہیں','err'); return; }
+  try {
+    const { createUserWithEmailAndPassword, updateProfile } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+    const cred = await createUserWithEmailAndPassword(auth, em, pw);
+    await updateProfile(cred.user, { displayName: name });
+    toast('Account کامیابی سے بن گیا ✅','ok');
+  } catch(e) {
+    const msg = e.code === 'auth/email-already-in-use' ? 'یہ Email پہلے سے registered ہے — Login کریں'
+              : e.code === 'auth/invalid-email'        ? 'Email درست نہیں'
+              : e.code === 'auth/weak-password'        ? 'پاسورڈ کمزور ہے، مضبوط پاسورڈ لکھیں'
+              : 'Register ناکام — ' + e.message;
+    toast(msg,'err');
+  }
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+  closeSidebar();
+};
+
+// ===== LISTENERS =====
+function startListeners() {
+  const uid = auth.currentUser?.uid;
+  onSnapshot(query(collection(db,'products'), where('userId','==',uid), orderBy('name')), s => {
+    products = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderProds(); populateProdSel(); refreshDash();
+  });
+  onSnapshot(query(collection(db,'customers'), where('userId','==',uid), orderBy('name')), s => {
+    customers = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCusts(); refreshDash();
+  });
+  onSnapshot(query(collection(db,'orders'), where('userId','==',uid), orderBy('orderDate','desc')), s => {
+    orders = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderOrders(); refreshDash();
+  });
+}
+
+// ===== NAVIGATION =====
+window.gotoPage = (pg) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('pg-' + pg);
+  if (!pageEl) return;
+  pageEl.classList.add('active');
+  const sn = document.getElementById('sn-' + pg);
+  const bn = document.getElementById('bn-' + pg);
+  if (sn) sn.classList.add('active');
+  if (bn) bn.classList.add('active');
+  const titles = { dashboard:'🏠 Dashboard', products:'💊 Products', customers:'👥 Customers', orders:'📦 Orders', reports:'📊 Reports', history:'📋 History' };
+  const topEl = document.getElementById('topTitle');
+  if (topEl) topEl.textContent = titles[pg] || '';
+  if (document.getElementById('sidebar')) closeSidebar();
+};
+
+window.openSidebar  = () => { document.getElementById('sidebar').classList.add('open');  document.getElementById('overlay').classList.add('show'); };
+window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); };
+window.closeM = (id) => document.getElementById(id).classList.remove('open');
+window.closeConf = () => document.getElementById('confBg').classList.remove('open');
+
+function showConf(msg, cb) {
+  document.getElementById('confMsg').textContent = msg;
+  confCb = cb;
+  document.getElementById('confBg').classList.add('open');
+}
+document.getElementById('confYes').onclick = () => { if (confCb) confCb(); closeConf(); };
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function fmtDate(d) {
+  if (!d) return '-';
+  const dt = d.toDate ? d.toDate() : new Date(d);
+  return dt.toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtRs(n) { return 'Rs. ' + (n||0).toLocaleString(); }
+function badgeClass(s) {
+  const m = { pending:'b-pending', dispatched:'b-dispatched', delivered:'b-delivered', returned:'b-returned' };
+  return m[(s||'').toLowerCase()] || 'b-pending';
+}
+
+// ===== DASHBOARD =====
+function refreshDash() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayOrds = orders.filter(o => {
+    const d = o.orderDate?.toDate ? o.orderDate.toDate() : new Date(o.orderDate||0);
+    return d >= today;
+  });
+  const todaySales = todayOrds.filter(o => o.status !== 'Returned').reduce((s,o) => s+(o.finalPrice||0), 0);
+  document.getElementById('d-todayOrders').textContent = todayOrds.length;
+  document.getElementById('d-todaySales').textContent  = 'Rs.' + todaySales.toLocaleString();
+  document.getElementById('d-customers').textContent   = customers.length;
+  document.getElementById('d-products').textContent    = products.length;
+
+  const rec = orders.slice(0,6);
+  const rEl = document.getElementById('recentOrders');
+  if (rec.length === 0) {
+    rEl.innerHTML = '<div class="empty"><div class="empty-ico">📦</div><p>ابھی کوئی آرڈر نہیں</p></div>';
+  } else {
+    rEl.innerHTML = rec.map(o => `
+      <div class="card" style="cursor:pointer;" onclick="gotoPage('orders')">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${o.customerName||'-'}</div>
+            <div class="card-sub">${o.productName||'-'} × ${o.quantity||1}</div>
+          </div>
+          <div style="text-align:left;">
+            <div style="font-weight:700;color:var(--primary);">${fmtRs(o.finalPrice)}</div>
+            <span class="badge ${badgeClass(o.status)}">${o.status||'Pending'}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ===== PRODUCTS =====
+window.openProdModal = (p) => {
+  document.getElementById('editProdId').value = p ? p.id : '';
+  document.getElementById('mProdTitle').textContent = p ? 'پروڈکٹ تبدیل کریں' : 'نیا پروڈکٹ';
+  document.getElementById('pName').value    = p?.name    || '';
+  document.getElementById('pFormula').value = p?.formula || '';
+  document.getElementById('pSell').value    = p?.sellingPrice || '';
+  document.getElementById('pCost').value    = p?.costPrice    || '';
+  document.getElementById('pUsage').value   = p?.usageMethod  || '';
+  document.getElementById('profitShow').innerHTML = '';
+  document.getElementById('mProd').classList.add('open');
+  if (p) calcProfit();
+};
+
+window.calcProfit = () => {
+  const s = parseFloat(document.getElementById('pSell').value) || 0;
+  const c = parseFloat(document.getElementById('pCost').value) || 0;
+  const pr = s - c;
+  document.getElementById('profitShow').innerHTML =
+    `<span class="${pr >= 0 ? 'p-tag' : 'l-tag'}">💡 منافع: ${fmtRs(pr)}</span>`;
+};
+
+window.saveProd = async () => {
+  const name = document.getElementById('pName').value.trim();
+  const sell = parseFloat(document.getElementById('pSell').value);
+  const cost = parseFloat(document.getElementById('pCost').value);
+  const formula = document.getElementById('pFormula').value.trim();
+  const usage   = document.getElementById('pUsage').value.trim();
+  const editId  = document.getElementById('editProdId').value;
+  if (!name) { toast('پروڈکٹ کا نام درج کریں','err'); return; }
+  if (isNaN(sell)||isNaN(cost)) { toast('قیمت درست درج کریں','err'); return; }
+  const uid = auth.currentUser?.uid;
+  const data = { name, formula, sellingPrice: sell, costPrice: cost, usageMethod: usage, userId: uid };
+  try {
+    if (editId) { await updateDoc(doc(db,'products',editId), data); toast('پروڈکٹ اپڈیٹ ✅','ok'); }
+    else { await addDoc(collection(db,'products'), { ...data, createdAt: serverTimestamp() }); toast('پروڈکٹ شامل ✅','ok'); }
+    closeM('mProd');
+  } catch(e) { toast('خرابی: '+e.message,'err'); }
+};
+
+window.delProd = (id, name) => showConf(`کیا "${name}" کو delete کرنا ہے؟`, async () => {
+  await deleteDoc(doc(db,'products',id)); toast('پروڈکٹ delete ہو گیا','ok');
+});
+
+window.renderProds = () => {
+  const q = (document.getElementById('srchProd')?.value||'').toLowerCase();
+  const list = products.filter(p => !q || p.name?.toLowerCase().includes(q));
+  const el = document.getElementById('prodList');
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-ico">💊</div><p>کوئی پروڈکٹ نہیں ملا</p></div>'; return; }
+  el.innerHTML = list.map(p => {
+    const pr = (p.sellingPrice||0)-(p.costPrice||0);
+    const pObj = JSON.stringify(p).replace(/"/g,'&quot;');
+    return `<div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💊 ${p.name}</div>
+          <div class="card-sub">${p.formula||'فارمولا نہیں'}</div>
+        </div>
+        <span class="${pr>=0?'p-tag':'l-tag'}">+${fmtRs(pr)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:9px 0;font-size:13px;">
+        <span>فروخت: <strong style="color:var(--primary);">${fmtRs(p.sellingPrice)}</strong></span>
+        <span style="color:var(--text-light);">لاگت: ${fmtRs(p.costPrice)}</span>
+      </div>
+      ${p.usageMethod?`<div style="font-size:12px;color:var(--text-light);background:#f5f8f5;padding:8px 10px;border-radius:10px;margin-bottom:10px;">📋 ${p.usageMethod}</div>`:''}
+      <div class="card-actions">
+        <button class="btn btn-outline btn-sm" onclick='openProdModal(${pObj})'>✏️ ترمیم</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}','${p.name}')">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// ===== CUSTOMERS =====
+window.openCustModal = (c) => {
+  document.getElementById('editCustId').value = c ? c.id : '';
+  document.getElementById('mCustTitle').textContent = c ? 'گاہک تبدیل کریں' : 'نیا گاہک';
+  document.getElementById('cName').value   = c?.name    || '';
+  document.getElementById('cMobile').value = c?.mobile  || '';
+  document.getElementById('cAddr').value   = c?.address || '';
+  document.getElementById('mCust').classList.add('open');
+};
+
+window.saveCust = async () => {
+  const name   = document.getElementById('cName').value.trim();
+  const mobile = document.getElementById('cMobile').value.trim();
+  const addr   = document.getElementById('cAddr').value.trim();
+  const editId = document.getElementById('editCustId').value;
+  if (!name)   { toast('گاہک کا نام درج کریں','err'); return; }
+  if (!mobile) { toast('موبائل نمبر درج کریں','err'); return; }
+  const dup = customers.find(c => c.mobile === mobile && c.id !== editId);
+  if (dup) { toast('یہ نمبر پہلے سے موجود ہے: '+dup.name,'err'); return; }
+  const uid2 = auth.currentUser?.uid;
+  const data = { name, mobile, address: addr, userId: uid2 };
+  try {
+    if (editId) { await updateDoc(doc(db,'customers',editId), data); toast('گاہک اپڈیٹ ✅','ok'); }
+    else { await addDoc(collection(db,'customers'), { ...data, createdAt: serverTimestamp() }); toast('گاہک شامل ✅','ok'); }
+    closeM('mCust');
+  } catch(e) { toast('خرابی: '+e.message,'err'); }
+};
+
+window.delCust = (id, name) => showConf(`کیا "${name}" کو delete کرنا ہے؟`, async () => {
+  await deleteDoc(doc(db,'customers',id)); toast('گاہک delete ہو گیا','ok');
+});
+
+window.showHistory = (custId, custName) => {
+  const cOrds = orders.filter(o => o.customerId === custId);
+  const spend  = cOrds.filter(o => o.status!=='Returned').reduce((s,o) => s+(o.finalPrice||0),0);
+  const last   = cOrds[0];
+  const lastDt = last?.orderDate ? fmtDate(last.orderDate) : '-';
+  document.getElementById('histName').textContent = '👤 ' + custName;
+  document.getElementById('histStats').innerHTML = `
+    <div class="hist-stat"><div class="hist-num">${cOrds.length}</div><div class="hist-lbl">کل آرڈر</div></div>
+    <div class="hist-stat"><div class="hist-num" style="font-size:15px;">${fmtRs(spend)}</div><div class="hist-lbl">کل خریداری</div></div>
+    <div class="hist-stat"><div class="hist-num" style="font-size:13px;">${lastDt}</div><div class="hist-lbl">آخری آرڈر</div></div>`;
+  document.getElementById('histList').innerHTML = cOrds.length
+    ? cOrds.map(o => orderCard(o)).join('')
+    : '<div class="empty"><div class="empty-ico">📦</div><p>کوئی آرڈر نہیں</p></div>';
+  gotoPage('history');
+};
+
+window.renderCusts = () => {
+  const q = (document.getElementById('srchCust')?.value||'').toLowerCase();
+  const list = customers.filter(c => !q || c.name?.toLowerCase().includes(q) || c.mobile?.includes(q));
+  const el = document.getElementById('custList');
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-ico">👥</div><p>کوئی گاہک نہیں ملا</p></div>'; return; }
+  el.innerHTML = list.map(c => {
+    const cnt = orders.filter(o => o.customerId === c.id).length;
+    const cObj = JSON.stringify(c).replace(/"/g,'&quot;');
+    return `<div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">👤 ${c.name}</div>
+          <div class="card-sub">📱 ${c.mobile}</div>
+          ${c.address?`<div class="card-sub">📍 ${c.address}</div>`:''}
+        </div>
+        <div style="text-align:left;">
+          <div style="font-size:13px;color:var(--text-light);font-weight:600;">${cnt} آرڈر</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-outline btn-sm" onclick="showHistory('${c.id}','${c.name}')">📋 تاریخ</button>
+        <button class="btn btn-outline btn-sm" onclick='openCustModal(${cObj})'>✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="delCust('${c.id}','${c.name}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// ===== ORDERS =====
+function populateProdSel() {
+  const s = document.getElementById('oProd');
+  if (!s) return;
+  const cur = s.value;
+  s.innerHTML = '<option value="">-- پروڈکٹ چنیں --</option>';
+  products.forEach(p => {
+    s.innerHTML += `<option value="${p.id}" data-sell="${p.sellingPrice}" data-cost="${p.costPrice}" data-usage="${(p.usageMethod||'').replace(/"/g,'')}">${p.name} — ${fmtRs(p.sellingPrice)}</option>`;
+  });
+  s.value = cur;
+}
+
+window.openOrderModal = (o) => {
+  document.getElementById('editOrdId').value = o ? o.id : '';
+  document.getElementById('mOrderTitle').textContent = o ? 'آرڈر تبدیل کریں' : 'نیا آرڈر';
+  document.getElementById('oMob').value      = o?.customerMobile || '';
+  document.getElementById('oProd').value     = o?.productId      || '';
+  document.getElementById('oQty').value      = o?.quantity       || 1;
+  document.getElementById('oDisc').value     = o?.discount       || 0;
+  document.getElementById('oDelivery').value = o?.deliveryCharges|| 0;
+  document.getElementById('oPayType').value  = o?.paymentType    || 'Advance';
+  document.getElementById('oCourier').value  = o?.courierName    || '';
+  document.getElementById('oTrack').value    = o?.trackingNumber || '';
+  document.getElementById('oStatus').value   = o?.status        || 'Pending';
+  document.getElementById('custFound').textContent = o ? '✅ '+o.customerName : '';
+  document.getElementById('custFound').style.color = 'var(--primary)';
+  document.getElementById('orderCalc').innerHTML = '';
+  if (o) calcOrder();
+  document.getElementById('mOrder').classList.add('open');
+};
+
+window.lookupCust = () => {
+  const mob = document.getElementById('oMob').value.trim();
+  const found = customers.find(c => c.mobile === mob);
+  const el = document.getElementById('custFound');
+  el.textContent = found ? '✅ '+found.name : (mob.length > 6 ? '❌ گاہک نہیں ملا — پہلے گاہک شامل کریں' : '');
+  el.style.color = found ? 'var(--primary)' : 'var(--red)';
+};
+
+window.calcOrder = () => {
+  const s = document.getElementById('oProd');
+  const opt = s.options[s.selectedIndex];
+  if (!opt?.value) { document.getElementById('orderCalc').innerHTML=''; return; }
+  const sell     = parseFloat(opt.dataset.sell)||0;
+  const cost     = parseFloat(opt.dataset.cost)||0;
+  const qty      = parseInt(document.getElementById('oQty').value)||1;
+  const disc     = parseFloat(document.getElementById('oDisc').value)||0;
+  const delivery = parseFloat(document.getElementById('oDelivery').value)||0;
+  const payType  = document.getElementById('oPayType').value;
+  const sub      = sell * qty;
+  const fin      = sub - disc;
+  const grossProfit = fin - (cost * qty);
+  const codTax   = payType === 'COD' ? Math.round(fin * 0.04) : 0;
+  const netProfit = grossProfit - delivery - codTax;
+  const codRow   = payType === 'COD' ? `<div class="price-row" style="color:var(--red);font-size:13px;"><span>COD ٹیکس (4%):</span><span>- ${fmtRs(codTax)}</span></div>` : '';
+  document.getElementById('orderCalc').innerHTML = \`
+    <div class="price-box">
+      <div class="price-row"><span>قیمت × تعداد:</span><span>\${fmtRs(sub)}</span></div>
+      <div class="price-row"><span>چھوٹ:</span><span>- \${fmtRs(disc)}</span></div>
+      <div class="price-row"><span>گاہک سے وصول رقم:</span><span style="color:var(--primary);font-weight:700;">\${fmtRs(fin)}</span></div>
+      <div class="price-row" style="border-top:1px dashed #a5d6a7;padding-top:8px;margin-top:4px;font-size:13px;"><span>مجموعی منافع:</span><span>\${fmtRs(grossProfit)}</span></div>
+      <div class="price-row" style="font-size:13px;color:var(--red);"><span>ڈیلیوری چارجز:</span><span>- \${fmtRs(delivery)}</span></div>
+      \${codRow}
+      <div class="price-row"><span>خالص منافع:</span><span class="\${netProfit>=0?'p-tag':'l-tag'}">\${fmtRs(netProfit)}</span></div>
+    </div>\`;
+};
+
+window.saveOrder = async () => {
+  const mob      = document.getElementById('oMob').value.trim();
+  const prodId   = document.getElementById('oProd').value;
+  const qty      = parseInt(document.getElementById('oQty').value)||1;
+  const disc     = parseFloat(document.getElementById('oDisc').value)||0;
+  const delivery = parseFloat(document.getElementById('oDelivery').value)||0;
+  const payType  = document.getElementById('oPayType').value;
+  const courier  = document.getElementById('oCourier').value;
+  const track    = document.getElementById('oTrack').value.trim();
+  const status   = document.getElementById('oStatus').value;
+  const editId   = document.getElementById('editOrdId').value;
+
+  if (!mob)    { toast('موبائل نمبر درج کریں','err'); return; }
+  const cust = customers.find(c => c.mobile === mob);
+  if (!cust)   { toast('گاہک نہیں ملا — پہلے گاہک شامل کریں','err'); return; }
+  if (!prodId) { toast('پروڈکٹ منتخب کریں','err'); return; }
+  const prod = products.find(p => p.id === prodId);
+  if (!prod)   { toast('پروڈکٹ نہیں ملا','err'); return; }
+
+  const finalPrice    = (prod.sellingPrice * qty) - disc;
+  const grossProfit   = finalPrice - ((prod.costPrice||0) * qty);
+  const codTax        = payType === 'COD' ? Math.round(finalPrice * 0.04) : 0;
+  const netProfit     = grossProfit - delivery - codTax;
+  const data = {
+    customerId: cust.id, customerName: cust.name, customerMobile: cust.mobile,
+    productId: prod.id, productName: prod.name,
+    productUsageMethod: prod.usageMethod||'',
+    productCostPrice: prod.costPrice||0,
+    quantity: qty, discount: disc, finalPrice,
+    deliveryCharges: delivery, paymentType: payType,
+    codTax, netProfit,
+    courierName: courier, trackingNumber: track, status,
+    userId: auth.currentUser?.uid
+  };
+  try {
+    if (editId) { await updateDoc(doc(db,'orders',editId), data); toast('آرڈر اپڈیٹ ✅','ok'); }
+    else { await addDoc(collection(db,'orders'), { ...data, orderDate: serverTimestamp() }); toast('آرڈر شامل ✅','ok'); }
+    closeM('mOrder');
+  } catch(e) { toast('خرابی: '+e.message,'err'); }
+};
+
+window.delOrder = (id) => showConf('کیا یہ آرڈر delete کرنا ہے؟', async () => {
+  await deleteDoc(doc(db,'orders',id)); toast('آرڈر delete ہو گیا','ok');
+});
+
+window.setFilter = (f) => {
+  orderFilter = f;
+  document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('on'));
+  const el = document.getElementById('fp-' + (f==='all'?'all':f));
+  if (el) el.classList.add('on');
+  renderOrders();
+};
+
+function orderCard(o) {
+  const dt = fmtDate(o.orderDate);
+  const oObj = JSON.stringify(o).replace(/"/g,'&quot;');
+  return `<div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">👤 ${o.customerName||'-'}</div>
+        <div class="card-sub">📱 ${o.customerMobile||''}</div>
+      </div>
+      <div style="text-align:left;">
+        <div style="font-weight:700;color:var(--primary);font-size:16px;">${fmtRs(o.finalPrice)}</div>
+        <span class="badge ${badgeClass(o.status)}">${o.status||'Pending'}</span>
+      </div>
+    </div>
+    <div class="chip-row">
+      <span class="chip">💊 ${o.productName||'-'} × ${o.quantity||1}</span>
+      <span class="chip">${o.paymentType==='COD'?'📦 COD':'💵 Advance'}</span>
+      ${o.deliveryCharges?`<span class="chip">🚚 ڈیلیوری: ${fmtRs(o.deliveryCharges)}</span>`:''}
+      ${o.courierName?`<span class="chip">${o.courierName}</span>`:''}
+      ${o.trackingNumber?`<span class="chip">📬 ${o.trackingNumber}</span>`:''}
+      <span class="chip">📅 ${dt}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:8px 10px;background:#f5f8f5;border-radius:10px;font-size:13px;">
+      <span style="color:var(--text-light);">خالص منافع:</span>
+      <span class="${(o.netProfit||0)>=0?'p-tag':'l-tag'}">${fmtRs(o.netProfit !== undefined ? o.netProfit : (o.finalPrice||0)-((o.productCostPrice||0)*(o.quantity||1)))}</span>
+    </div>
+    <div class="card-actions">
+      ${o.trackingNumber?`<button class="btn btn-green btn-sm" onclick="openWa('${o.id}')">📱 WA</button>`:''}
+      <button class="btn btn-outline btn-sm" onclick='openOrderModal(${oObj})'>✏️ ترمیم</button>
+      <button class="btn btn-danger btn-sm" onclick="delOrder('${o.id}')">🗑️</button>
+    </div>
+  </div>`;
+}
+
+window.renderOrders = () => {
+  const q = (document.getElementById('srchOrder')?.value||'').toLowerCase();
+  let list = [...orders];
+  if (orderFilter !== 'all') list = list.filter(o => o.status === orderFilter);
+  if (q) list = list.filter(o => o.customerName?.toLowerCase().includes(q) || o.productName?.toLowerCase().includes(q));
+  const el = document.getElementById('orderList');
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-ico">📦</div><p>کوئی آرڈر نہیں ملا</p></div>'; return; }
+  el.innerHTML = list.map(o => orderCard(o)).join('');
+};
+
+// ===== WHATSAPP =====
+window.openWa = (ordId) => {
+  const o = orders.find(x => x.id === ordId);
+  if (!o) return;
+  const msg = `السلام علیکم محترم ${o.customerName} صاحب!
+امید ہے کہ آپ خیریت سے ہوں گے۔
+
+ہم آپ کے بے حد شکر گزار ہیں کہ آپ نے عارفی دارالشفاء سے ${o.productName} کا آرڈر دیا۔
+
+آپ کا آرڈر بھجوا دیا گیا ہے۔
+
+Tracking Number: ${o.trackingNumber}
+Courier: ${o.courierName}
+
+عموماً 2 سے 7 دن میں پارسل موصول ہو جاتا ہے۔
+
+طریقہ استعمال: ${o.productUsageMethod||'-'}
+
+شکریہ 🌿
+عارفی دارالشفاء — نام ہی شفاء ہے`;
+  document.getElementById('waText').textContent = msg;
+  const ph = (o.customerMobile||'').replace(/\D/g,'');
+  const intl = ph.startsWith('0') ? '92'+ph.slice(1) : ph;
+  document.getElementById('waSendBtn').onclick = () =>
+    window.open('https://wa.me/'+intl+'?text='+encodeURIComponent(msg),'_blank');
+  document.getElementById('mWa').classList.add('open');
+};
+
+// ===== REPORTS =====
+window.makeReport = () => {
+  const from = document.getElementById('rFrom').value;
+  const to   = document.getElementById('rTo').value;
+  if (!from||!to) { toast('تاریخ درج کریں','err'); return; }
+  const fd = new Date(from); fd.setHours(0,0,0,0);
+  const td = new Date(to);   td.setHours(23,59,59,999);
+
+  const filtered = orders.filter(o => {
+    const d = o.orderDate?.toDate ? o.orderDate.toDate() : new Date(o.orderDate||0);
+    return d >= fd && d <= td;
+  });
+  const active   = filtered.filter(o => o.status !== 'Returned');
+  const sales    = active.reduce((s,o) => s+(o.finalPrice||0), 0);
+  const cost     = active.reduce((s,o) => s+((o.productCostPrice||0)*(o.quantity||1)), 0);
+  const totalDelivery = active.reduce((s,o) => s+(o.deliveryCharges||0), 0);
+  const totalCodTax   = active.reduce((s,o) => s+(o.codTax||0), 0);
+  const profit   = active.reduce((s,o) => s+(o.netProfit !== undefined ? o.netProfit : (o.finalPrice||0)-((o.productCostPrice||0)*(o.quantity||1))), 0);
+  const returned = filtered.filter(o => o.status === 'Returned');
+
+  document.getElementById('reportOut').innerHTML = `
+    <div class="sec-head" style="margin-top:16px;">
+      <h3>📊 ${from} — ${to}</h3>
+    </div>
+    <div class="rep-grid">
+      <div class="rep-card"><div class="rep-num">${filtered.length}</div><div class="rep-lbl">کل آرڈر</div></div>
+      <div class="rep-card"><div class="rep-num" style="font-size:16px;">${fmtRs(sales)}</div><div class="rep-lbl">کل سیل (وصولی)</div></div>
+      <div class="rep-card"><div class="rep-num" style="font-size:16px;">${fmtRs(cost)}</div><div class="rep-lbl">کل لاگت</div></div>
+      <div class="rep-card" style="border-color:${profit>=0?'#a5d6a7':'#f5c6cb'};">
+        <div class="rep-num" style="color:${profit>=0?'var(--primary)':'var(--red)'};">${fmtRs(profit)}</div>
+        <div class="rep-lbl">خالص منافع</div>
+      </div>
+    </div>
+    <div class="card" style="border-right:4px solid var(--accent);">
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;">
+        <span>🚚 ڈیلیوری چارجز:</span><strong style="color:var(--red);">- ${fmtRs(totalDelivery)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;">
+        <span>📦 COD ٹیکس (4%):</span><strong style="color:var(--red);">- ${fmtRs(totalCodTax)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;border-top:1px dashed #ddd;padding-top:8px;">
+        <span>✅ Delivered آرڈر:</span><strong>${active.filter(o=>o.status==='Delivered').length}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;">
+        <span>🚚 Dispatched آرڈر:</span><strong>${active.filter(o=>o.status==='Dispatched').length}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;">
+        <span>💵 Advance آرڈر:</span><strong>${active.filter(o=>o.paymentType==='Advance'||!o.paymentType).length}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;">
+        <span>📦 COD آرڈر:</span><strong>${active.filter(o=>o.paymentType==='COD').length}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--red);">
+        <span>↩️ Returned آرڈر (سیل سے خارج):</span><strong>${returned.length}</strong>
+      </div>
+    </div>\`;
+};
+</script>
+</body>
+</html>
